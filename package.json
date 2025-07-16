@@ -1,0 +1,17 @@
+{
+  "name": "prisync-supabase-sync",
+  "version": "1.0.0",
+  "description": "Sync Prisync pricing data with Supabase database",
+  "main": "sync-prices.js",
+  "scripts": {
+    "sync": "node sync-prices.js",
+    "test": "node test-sync.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
