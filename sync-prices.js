@@ -63,7 +63,7 @@ async function updateDatabasePrices() {
   // Get all products from database
   const { data: products, error: fetchError } = await supabase
     .from('bags')
-    .select('id, product_link, price')
+    .select('id, product_link, normal_retail_price')
     .not('product_link', 'is', null)
   
   if (fetchError) {
