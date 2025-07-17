@@ -62,7 +62,7 @@ async function fetchPrisyncPriceForUrl(productUrl) {
 async function updateDatabasePrices() {
   // Get all products from database
   const { data: products, error: fetchError } = await supabase
-    .from('carry_on_bags')
+    .from('bags')
     .select('id, product_link, price')
     .not('product_link', 'is', null)
   
@@ -93,7 +93,7 @@ async function updateDatabasePrices() {
         
         if (currentPrice) {
           const { error: updateError } = await supabase
-            .from('carry_on_bags')
+            .from('bags')
             .update({ 
               price: currentPrice,
               last_price_update: new Date().toISOString()
