@@ -95,7 +95,7 @@ async function updateDatabasePrices() {
           const { error: updateError } = await supabase
             .from('bags')
             .update({ 
-              price: currentPrice,
+              normal_retail_price: currentPrice,
               last_price_update: new Date().toISOString()
             })
             .eq('id', product.id)
