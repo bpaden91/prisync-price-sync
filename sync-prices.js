@@ -65,25 +65,37 @@ function findMatchingPrisyncProduct(productUrl, databaseProductName, prisyncProd
     // Check for exact match
     if (prisyncName === dbName) {
       console.log(`  ✓ Exact match found!`)
-      // Get the price from the first URL that has a price
-      const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
-      if (urlWithPrice) {
-        return {
-          product: prisyncProduct,
-          matchedUrl: urlWithPrice
+      // Check if urls exist and find one with a price
+      if (prisyncProduct.urls && Array.isArray(prisyncProduct.urls) && prisyncProduct.urls.length > 0) {
+        const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
+        if (urlWithPrice) {
+          return {
+            product: prisyncProduct,
+            matchedUrl: urlWithPrice
+          }
+        } else {
+          console.log(`  - Product found but no URL with price available`)
         }
+      } else {
+        console.log(`  - Product found but no URLs available`)
       }
     }
     
     // Check for partial match (if one name contains the other)
     if (prisyncName.includes(dbName) || dbName.includes(prisyncName)) {
       console.log(`  ✓ Partial match found!`)
-      const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
-      if (urlWithPrice) {
-        return {
-          product: prisyncProduct,
-          matchedUrl: urlWithPrice
+      if (prisyncProduct.urls && Array.isArray(prisyncProduct.urls) && prisyncProduct.urls.length > 0) {
+        const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
+        if (urlWithPrice) {
+          return {
+            product: prisyncProduct,
+            matchedUrl: urlWithPrice
+          }
+        } else {
+          console.log(`  - Product found but no URL with price available`)
         }
+      } else {
+        console.log(`  - Product found but no URLs available`)
       }
     }
   }
