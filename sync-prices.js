@@ -53,7 +53,7 @@ async function fetchAllPrisyncProducts() {
   }
 }
 
-function findMatchingPrisyncProduct(productUrl, databaseProductName, prisyncProducts) {
+function findMatchingPrisyncProduct(databaseProductName, prisyncProducts) {
   console.log(`Looking for Prisync match for: "${databaseProductName}"`)
   
   for (const prisyncProduct of prisyncProducts) {
@@ -65,37 +65,23 @@ function findMatchingPrisyncProduct(productUrl, databaseProductName, prisyncProd
     // Check for exact match
     if (prisyncName === dbName) {
       console.log(`  ✓ Exact match found!`)
-      // Check if urls exist and find one with a price
-      if (prisyncProduct.urls && Array.isArray(prisyncProduct.urls) && prisyncProduct.urls.length > 0) {
-        const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
-        if (urlWithPrice) {
-          return {
-            product: prisyncProduct,
-            matchedUrl: urlWithPrice
-          }
-        } else {
-          console.log(`  - Product found but no URL with price available`)
+      console.log(`  Product data:`, JSON.stringify(prisyncProduct, null, 2))
+      
+      // Try to get price from different possible fields
+      const price = prisyncProduct.smart_price || 
+                   prisyncProduct.price || 
+                   prisyncProduct.current_price ||
+                   (prisyncProduct.urls && prisyncProduct.urls[0] && prisyncProduct.urls[0].price)
+      
+      if (price && parseFloat(price) > 0) {
+        console.log(`  ✓ Found price: $${price}`)
+        return {
+          product: prisyncProduct,
+          price: parseFloat(price)
         }
       } else {
-        console.log(`  - Product found but no URLs available`)
-      }
-    }
-    
-    // Check for partial match (if one name contains the other)
-    if (prisyncName.includes(dbName) || dbName.includes(prisyncName)) {
-      console.log(`  ✓ Partial match found!`)
-      if (prisyncProduct.urls && Array.isArray(prisyncProduct.urls) && prisyncProduct.urls.length > 0) {
-        const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
-        if (urlWithPrice) {
-          return {
-            product: prisyncProduct,
-            matchedUrl: urlWithPrice
-          }
-        } else {
-          console.log(`  - Product found but no URL with price available`)
-        }
-      } else {
-        console.log(`  - Product found but no URLs available`)
+        console.log(`  - Product found but no price available`)
+        return null
       }
     }
   }
