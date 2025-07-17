@@ -65,22 +65,28 @@ function findMatchingPrisyncProduct(databaseProductName, prisyncProducts) {
     // Check for exact match
     if (prisyncName === dbName) {
       console.log(`  ✓ Exact match found!`)
-      console.log(`  Product data:`, JSON.stringify(prisyncProduct, null, 2))
       
-      // Try to get price from different possible fields
-      const price = prisyncProduct.smart_price || 
-                   prisyncProduct.price || 
-                   prisyncProduct.current_price ||
-                   (prisyncProduct.urls && prisyncProduct.urls[0] && prisyncProduct.urls[0].price)
+      // Extract price from summary object
+      let price = null
+      if (prisyncProduct.summary) {
+        // Get the first available price from any site in the summary
+        const sites = Object.keys(prisyncProduct.summary)
+        for (const site of sites) {
+          if (prisyncProduct.summary[site] && prisyncProduct.summary[site].price) {
+            price = parseFloat(prisyncProduct.summary[site].price)
+            console.log(`  ✓ Found price from ${site}: $${price}`)
+            break
+          }
+        }
+      }
       
-      if (price && parseFloat(price) > 0) {
-        console.log(`  ✓ Found price: $${price}`)
+      if (price && price > 0) {
         return {
           product: prisyncProduct,
-          price: parseFloat(price)
+          price: price
         }
       } else {
-        console.log(`  - Product found but no price available`)
+        console.log(`  - Product found but no price available in summary`)
         return null
       }
     }
