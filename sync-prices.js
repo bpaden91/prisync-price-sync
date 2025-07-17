@@ -116,10 +116,10 @@ async function updateDatabasePrices() {
   
   for (const product of products) {
     try {
-      const match = findMatchingPrisyncProduct(product.product_link, product.bag_name, prisyncProducts)
+      const match = findMatchingPrisyncProduct(product.bag_name, prisyncProducts)
       
-      if (match && match.matchedUrl && match.matchedUrl.price) {
-        const currentPrice = parseFloat(match.matchedUrl.price)
+      if (match && match.price) {
+        const currentPrice = match.price
         
         const { error: updateError } = await supabase
           .from('bags')
