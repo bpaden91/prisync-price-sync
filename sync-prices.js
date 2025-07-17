@@ -53,28 +53,42 @@ async function fetchAllPrisyncProducts() {
   }
 }
 
-function findMatchingPrisyncProduct(productUrl, prisyncProducts) {
-  // Clean the URL for better matching
-  const cleanUrl = productUrl.toLowerCase().replace(/[?&].*$/, '') // Remove query parameters
+function findMatchingPrisyncProduct(productUrl, databaseProductName, prisyncProducts) {
+  console.log(`Looking for Prisync match for: "${databaseProductName}"`)
   
   for (const prisyncProduct of prisyncProducts) {
-    if (prisyncProduct.urls && Array.isArray(prisyncProduct.urls)) {
-      for (const url of prisyncProduct.urls) {
-        const cleanPrisyncUrl = url.url.toLowerCase().replace(/[?&].*$/, '')
-        
-        // Check for exact match or base URL match
-        if (cleanPrisyncUrl === cleanUrl || 
-            cleanUrl.includes(cleanPrisyncUrl) || 
-            cleanPrisyncUrl.includes(cleanUrl)) {
-          return {
-            product: prisyncProduct,
-            matchedUrl: url
-          }
+    const prisyncName = prisyncProduct.name.toLowerCase().trim()
+    const dbName = databaseProductName.toLowerCase().trim()
+    
+    console.log(`  Comparing with Prisync product: "${prisyncProduct.name}"`)
+    
+    // Check for exact match
+    if (prisyncName === dbName) {
+      console.log(`  ✓ Exact match found!`)
+      // Get the price from the first URL that has a price
+      const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
+      if (urlWithPrice) {
+        return {
+          product: prisyncProduct,
+          matchedUrl: urlWithPrice
+        }
+      }
+    }
+    
+    // Check for partial match (if one name contains the other)
+    if (prisyncName.includes(dbName) || dbName.includes(prisyncName)) {
+      console.log(`  ✓ Partial match found!`)
+      const urlWithPrice = prisyncProduct.urls.find(url => url.price && parseFloat(url.price) > 0)
+      if (urlWithPrice) {
+        return {
+          product: prisyncProduct,
+          matchedUrl: urlWithPrice
         }
       }
     }
   }
   
+  console.log(`  ✗ No match found for "${databaseProductName}"`)
   return null
 }
 
@@ -82,7 +96,7 @@ async function updateDatabasePrices() {
   // Get all products from database
   const { data: products, error: fetchError } = await supabase
     .from('bags')
-    .select('id, product_link, normal_retail_price')
+    .select('id, product_link, normal_retail_price, bag_name')
     .not('product_link', 'is', null)
   
   if (fetchError) {
@@ -104,7 +118,7 @@ async function updateDatabasePrices() {
   
   for (const product of products) {
     try {
-      const match = findMatchingPrisyncProduct(product.product_link, prisyncProducts)
+      const match = findMatchingPrisyncProduct(product.product_link, product.bag_name, prisyncProducts)
       
       if (match && match.matchedUrl && match.matchedUrl.price) {
         const currentPrice = parseFloat(match.matchedUrl.price)
