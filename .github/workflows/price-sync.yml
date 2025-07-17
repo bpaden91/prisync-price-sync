@@ -2,8 +2,8 @@ name: Automated Prisync Price Sync
 
 on:
   schedule:
-    # Run every day at 6 AM UTC
-    - cron: '0 6 * * *'
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch: # Allow manual trigger for testing
 
 jobs:
